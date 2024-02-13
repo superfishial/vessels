@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbittorrent
+  labels:
+    app: qbittorrent
+spec:
+  replicas: 1
+  serviceName: qbittorrent
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      nodeName: nereid-1
+      containers:
+        # Torrent client
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:latest
+          imagePullPolicy: Always
+          env:
+            - name: TZ
+              value: Etc/UTC
+            - name: PUID
+              value: "1000"
+            - name: GUID
+              value: "1000"
+          # hack: restarts the container every 30 minutes due to
+          # trackers failing to connect after a while
+          livenessProbe:
+            exec:
+              command:
+                - /liveness-probe.sh
+            periodSeconds: 60
+          volumeMounts:
+            - mountPath: /data/torrents
+              name: media
+              subPath: torrents
+            - mountPath: /config
+              name: qbittorrent-config
+            - mountPath: /liveness-probe.sh
+              name: qbittorrent-restart-probe
+              subPath: probe.sh
+          resources:
+            requests:
+              cpu: 100m
+              memory: 8Gi
+            limits:
+              cpu: "2"
+              memory: 12Gi
+        # VPN
+        - name: vpn
+          image: qmcgaw/gluetun:v3
+          imagePullPolicy: Always
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: mullvad
+            - name: VPN_TYPE
+              value: wireguard
+            - name: PROXY_PORT
+              value: "8888"
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080"
+          envFrom:
+            - secretRef:
+                name: qbittorrent-wireguard
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+        - name: qbittorrent-config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - name: qbittorrent-restart-probe
+          configMap:
+            name: qbittorrent-restart-probe
+            defaultMode: 0555
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  labels:
+    app: qbittorrent
+spec:
+  type: ClusterIP
+  selector:
+    app: qbittorrent
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

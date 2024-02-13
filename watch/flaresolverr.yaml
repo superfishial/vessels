@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaresolverr
+  labels:
+    app: flaresolverr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaresolverr
+  template:
+    metadata:
+      labels:
+        app: flaresolverr
+    spec:
+      containers:
+        - name: flaresolverr
+          image: flaresolverr/flaresolverr:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8191
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaresolverr
+  labels:
+    app: flaresolverr
+spec:
+  type: ClusterIP
+  selector:
+    app: flaresolverr
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

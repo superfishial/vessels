@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyseerr
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: request.watch.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyseerr
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - request.watch.super.fish
+      secretName: request.watch.super.fish

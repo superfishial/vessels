@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bazarr
+  labels:
+    app: bazarr
+spec:
+  replicas: 1
+  serviceName: bazarr
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    metadata:
+      labels:
+        app: bazarr
+    spec:
+      nodeName: nereid-1
+      containers:
+        - name: bazarr
+          image: ghcr.io/hotio/bazarr:release
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 6767
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 4Gi
+          volumeMounts:
+            - name: bazarr-config
+              mountPath: /config
+            - name: media
+              mountPath: /data
+      volumes:
+        - name: bazarr-config
+          persistentVolumeClaim:
+            claimName: bazarr-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bazarr
+  labels:
+    app: bazarr
+spec:
+  type: ClusterIP
+  selector:
+    app: bazarr
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

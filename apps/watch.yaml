@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: watch
+  namespace: argocd
+spec:
+  project: vessels
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: watch
+  source:
+    directory:
+      recurse: true
+    repoURL: https://github.com/superfishial/vessels
+    targetRevision: HEAD
+    path: watch
+  syncPolicy:
+    automated: {}

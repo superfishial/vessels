@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jackett-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: ssd
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# Generate APIKey with: head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32 ; echo ''
+#
+# ServerConfig.json: |-
+#   {
+#     "Port": 9117,
+#     "AllowExternal": true,
+#     "AllowCORS": false,
+#     "APIKey": "YOUR_API_KEY_HERE",
+#     "AdminPassword": "",
+#     "InstanceId": "2ecj06luhvnzws3zhrj1u3pbj4ubkarudzrbzm0wmsm6790lbt43eqxaamoqgfy5",
+#     "BlackholeDir": "",
+#     "UpdateDisabled": false,
+#     "UpdatePrerelease": false,
+#     "BasePathOverride": "",
+#     "BaseUrlOverride": "https://jackett.watch.super.fish",
+#     "CacheEnabled": true,
+#     "CacheTtl": 2100,
+#     "CacheMaxResultsPerIndexer": 1000,
+#     "FlareSolverrUrl": "http://flaresolverr",
+#     "FlareSolverrMaxTimeout": 55000,
+#     "OmdbApiKey": "",
+#     "OmdbApiUrl": "",
+#     "ProxyType": -1,
+#     "ProxyUrl": "",
+#     "ProxyPort": null,
+#     "ProxyUsername": "",
+#     "ProxyPassword": "",
+#     "ProxyIsAnonymous": true,
+#     "EnhancedLogging": true
+#   }
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: jackett-config
+  namespace: watch
+spec:
+  encryptedData:
+    ServerConfig.json: AgBo5szr6RqwWjp8UaHvL6dSeIexEacx4KatL9qxGpkjPh4fOL4E7fILtu+fTmEGt08BXOapIAldrt7OCFE8wNwhFEqqZBKCNyc7hT53Rj/GaQxvwum9F6mU+9pFqKc+s1XPEbaIpM0WtuuYICUwalOvUmyOR80SHkGhlWzgP7b3dj5As+eKEnt1ys5A39qV0eriPwToUllX7RZd6qFItBycBbT91F87vOG9uLPoTDM/cNi7KPo3gNVgV0cEXomyluWssaUBj6HbXETwDAXVEuxqgB/vEs8XkseMHQOalVWWZiBAFrTuscjG+WWgWiwcjwRy+pXWz/7QmScgAveiWhBhGpaQqf60MuJIrpNZo/Ew5Ecj44qJJeQJ5io1sKeHmv+yvoTaZe6XBCeuc5BR+80/QbEFdlhtnLDaoKZvlOD0MlqwxkppXLIdddOnRuIq7+x4ji24GEztzlGv+0WynIFgbiuGRC+Y6nZ+Tt4mzCvERxS0aE4pgB6nBcYL296Cau1pdGzGFajZrnimDzZMwPkiF3ccBN+QjRV1OlllENCHkMVr2nCXPVixv2d2+VZ0/A131J8otF6KGZnwcfL5BnyEFq2Xzwm4EYR+WDGyiA2vlCjxY9UbkUm06XeWeuY9kV+HGMsNPhOimtM3hF2xsRVsjTqPwSkRm2XapppzktIuRmsEAk+nSUHELw/Qb2W+pN+hG1+bYAcIjSpWqp0bqzuygZai6dIyQMINS1jhOq9mIcvVdQTkncOo432qGBoBRDbgnDMWsS8OeIKhORfNgRI46+4V4IcKwAIWMR7mBtuzWSX8L4LG/dw2NRSNs1DGj385ZVM54e1SCamSa0zAfNG+oqrUuGy4pV8XCocYWxpRKzRar7EOlCc63eR8/tTMS+9MBLeh/C8MCnChf4MorXu8PZQewg50J5/spue2fX2O/HPE7cGqE8X7eeYvn3xRvB91jRDQ80UU9XtV9qlr7Q7FXkoJYraVS44wEktGZZ1Bjae7MJ1URvfu0ewwDOCxopAOU0xiPjWYcrQOIt86G4dgZ+LqgjbWb9xhE98WZOgtbvJMZGDEkG4JjdVZiAv3iYPEF5zuGlTR7y2I3Ia9CVWnMKvxf8hp2FNlEKEbO8m14DvOP22o4mZLQPcIef29YSHyteeZ2kkDkP5U2WB3P6x5dcct6V2HcMkLEC/kLi/QUpeRGxXSVo8ULPDI0eCVoC4DJr7IgeWeoyd4hbW5pETsJakelMgdYCRndFo+AU4mBURc4IHFWTuLa8xmnp+4HFzR9gzU8iUfBsiHpAyj9/+tlhfQoTWr7vgDmPUfMOtAr16OY1d1Oe/M1TtMCn2IiYOCobvwezHEwcTulytk5GoeBDWA1joAEODwCAGb9HgTcP8Xsrir/vsosk6HHFUteI7NkYM/BIKhm1yTBdRoHCU49hfIG1i9b3YH6eDwBwzM7FIkim8Vp6GzHDYZG9shhvJ7VC2toY0F2ukiOrdojMaK/w19lKpnkO8IWUm0BC4UouKull/5ByXsi2lyyoeYIrjumCrgH2cmHLkQDC38svWSyYibZWydbBe9jANKJljwm6XCRp4/W9bzXlWHTdYXoyEz1ifnhTh3Dz3RHVxow5IbFsoe48PWC3byl/LapmiLqMLH1tA8ZYKxKFdORuFtkz0sFTE=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: jackett-config
+      namespace: watch

@@ -1,0 +1,42 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bazarr
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`bazarr.watch.super.fish`)
+      kind: Rule
+      priority: 0
+      middlewares:
+        - name: forward-auth
+      services:
+        - kind: Service
+          name: bazarr
+          port: 80
+          scheme: http
+    - match: Host(`bazarr.watch.super.fish`) && PathPrefix(`/outpost.goauthentik.io/`)
+      kind: Rule
+      priority: 100
+      services:
+        - kind: Service
+          name: authentik
+          namespace: authentik
+          port: 80
+          scheme: http
+  tls:
+    secretName: bazarr.watch.super.fish
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bazarr.watch.super.fish
+spec:
+  dnsNames:
+    - bazarr.watch.super.fish
+  secretName: bazarr.watch.super.fish
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

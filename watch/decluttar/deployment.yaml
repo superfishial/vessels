@@ -1,0 +1,35 @@
+# Removes stalled torrents from sonarr/radarr
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: decluttar
+  labels:
+    app: decluttar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: decluttar
+  template:
+    metadata:
+      labels:
+        app: decluttar
+    spec:
+      containers:
+        - name: decluttar
+          image: ghcr.io/manimatter/decluttarr:v1.20.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: decluttar-config
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: config
+          secret:
+            secretName: decluttar-config
