@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bin
+  labels:
+    app: bin
+spec:
+  replicas: 1
+  serviceName: bin
+  selector:
+    matchLabels:
+      app: bin
+  template:
+    metadata:
+      labels:
+        app: bin
+    spec:
+      containers:
+        - name: bin
+          image: wantguns/bin:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 6162
+          env:
+            - name: BIN_PORT
+              value: "6162"
+            - name: BIN_LIMITS
+              value: '{form="16 MiB",file="16 MiB"}'
+            - name: HOST_URL
+              value: "https://paste.super.fish"
+          resources:
+            requests:
+              cpu: 20m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: /upload
+              name: bin-upload
+      volumes:
+        - name: bin-upload
+          persistentVolumeClaim:
+            claimName: bin-upload
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bin-upload
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: ssd
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bin
+  labels:
+    app: bin
+  annotations:
+    # 10GBs and 20GBs
+    traefik.ingress.kubernetes.io/buffering: |
+      maxrequestbodybytes: 10000000000
+      memrequestbodybytes: 20000000000
+spec:
+  selector:
+    app: bin
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 6162
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bin
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: paste.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bin
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - paste.super.fish
+      secretName: paste.super.fish
