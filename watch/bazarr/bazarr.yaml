@@ -28,8 +28,8 @@ spec:
               cpu: 10m
               memory: 100Mi
             limits:
-              cpu: "1"
-              memory: 4Gi
+              cpu: "4"
+              memory: 6Gi
           volumeMounts:
             - name: bazarr-config
               mountPath: /config
