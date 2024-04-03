@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: proxy
+  namespace: argocd
+spec:
+  project: fkn
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fkn
+  source:
+    repoURL: https://github.com/MFKN/proxy
+    path: k8s
+    targetRevision: HEAD
+    kustomize:
+      images:
+        - proxy=docker.super.fish/fkn/proxy:$ARGOCD_APP_REVISION
+  syncPolicy:
+    automated: {}
