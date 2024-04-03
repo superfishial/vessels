@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: searx
+  namespace: argocd
+spec:
+  project: vessels
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vessels
+  source:
+    repoURL: https://charts.searxng.org
+    helm:
+      version: 1.0.0
+      valuesObject:
+        env:
+          INSTANCE_NAME: "search.super.fish"
+          BASE_URL: "https://search.super.fish"
+          AUTOCOMPLETE: "google"
+        ingress:
+          main:
+            enabled: true
+            hosts:
+              - host: search.super.fish
+                paths:
+                  - path: /
+                    service:
+                      port: 8080
+            tls:
+              - secretName: search.super.fish
+                hosts:
+                  - search.super.fish
+        searxng:
+          config:
+            use_default_settings: true
+            general:
+              contact_url: https://opencollective.com/superfishial
+            ui:
+              query_in_title: true
+            server:
+              secret_key: super-duper-super-fish-secret-key-idk-what-else
+            search:
+              autocomplete: google
+              autocomplete_min: 3
+            enabled_plugins:
+              - "Vim-like hotkeys"
+            engines:
+              - name: arch linux wiki
+                shortcut: aw
+              - name: spotify
+                engine: spotify
+                shortcut: spt
+                categories: music
+                api_client_id: 3f85015f822949a5855a0929daa5bd2c
+                api_client_secret: e6471ed82f64405ca9b0a4098d4b9b84
+              - name: bing
+                disabled: false
+              - name: brave
+                disabled: false
