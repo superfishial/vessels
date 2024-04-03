@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: docker.super.fish/ente/server:latest
+          image: ghcr.io/ente-io/server:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
