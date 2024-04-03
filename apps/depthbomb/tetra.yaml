@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tetra
+  namespace: argocd
+spec:
+  project: depthbomb
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: depthbomb
+  source:
+    repoURL: https://github.com/depthbomb/tetra
+    path: k8s
+    targetRevision: HEAD
+    kustomize:
+      images:
+        - tetra=docker.super.fish/depthbomb/tetra:$ARGOCD_APP_REVISION
+  syncPolicy:
+    automated: {}
