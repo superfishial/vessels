@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chat
+  namespace: argocd
+spec:
+  project: vessels
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: chat
+  source:
+    repoURL: https://github.com/superfishial/vessels
+    path: chat
+    targetRevision: HEAD
+  syncPolicy:
+    automated: {}

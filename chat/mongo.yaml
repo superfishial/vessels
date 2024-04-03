@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: chat-ui-mongo
+  labels:
+    app: chat-ui-mongo
+spec:
+  replicas: 1
+  serviceName: chat-ui-mongo
+  selector:
+    matchLabels:
+      app: chat-ui-mongo
+  template:
+    metadata:
+      labels:
+        app: chat-ui-mongo
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: chat-ui-mongo
+          image: bitnami/mongodb:7.0
+          imagePullPolicy: Always
+          env:
+            - name: MONGODB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chat-ui-mongo
+                  key: rootPassword
+            - name: MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: chat-ui-mongo
+                  key: username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: chat-ui-mongo
+                  key: password
+            - name: MONGODB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: chat-ui-mongo
+                  key: db
+          ports:
+            - containerPort: 27017
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: chat-ui-mongo
+              mountPath: /bitnami/mongodb
+  volumeClaimTemplates:
+    - metadata:
+        name: chat-ui-mongo
+        finalizers:
+          - kubernetes.io/pvc-protection
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-ui-mongo
+spec:
+  selector:
+    app: chat-ui-mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: chat-ui-mongo
+spec:
+  podSelector:
+    matchLabels:
+      app: chat-ui-mongo
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: chat-ui
