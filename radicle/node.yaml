@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radicle-node
+  labels:
+    app: radicle
+    component: node
+spec:
+  replicas: 1
+  serviceName: radicle
+  selector:
+    matchLabels:
+      app: radicle
+      component: node
+  template:
+    metadata:
+      labels:
+        app: radicle
+        component: node
+    spec:
+      nodeName: nereid-2
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: node
+          image: docker.super.fish/radicle/node:latest
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "30000"
+          ports:
+            - name: node
+              containerPort: 30000
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /radicle/config.json
+              subPath: config.json
+            - name: config
+              mountPath: /radicle/keys/radicle.pub
+              subPath: radicle.pub
+            - name: secret
+              mountPath: /radicle/keys/radicle
+              subPath: radicle
+            - name: db
+              mountPath: /radicle
+
+      volumes:
+        - name: config
+          configMap:
+            name: radicle
+        - name: secret
+          secret:
+            secretName: radicle
+        - name: db
+          persistentVolumeClaim:
+            claimName: radicle
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle-node
+  labels:
+    app: radicle
+    component: node
+spec:
+  selector:
+    app: radicle
+    component: node
+  type: NodePort
+  ports:
+    - name: http
+      port: 30000
+      nodePort: 30000
+      targetPort: http

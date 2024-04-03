@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radicle-interface
+  labels:
+    app: radicle
+    component: interface
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: radicle
+      component: interface
+  template:
+    metadata:
+      labels:
+        app: radicle
+        component: interface
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: interface
+          image: docker.super.fish/radicle/interface:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: [ALL]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle-interface
+  labels:
+    app: radicle
+    component: interface
+spec:
+  selector:
+    app: radicle
+    component: interface
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
