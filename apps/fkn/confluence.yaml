@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: confluence
+  namespace: argocd
+spec:
+  project: fkn
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fkn
+  source:
+    repoURL: https://github.com/MFKN/confluence
+    path: k8s
+    targetRevision: HEAD
+    kustomize:
+      images:
+        - confluence=docker.super.fish/fkn/confluence:$ARGOCD_APP_REVISION
+  syncPolicy:
+    automated: {}
