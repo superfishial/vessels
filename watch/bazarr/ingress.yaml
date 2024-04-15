@@ -16,6 +16,14 @@ spec:
           name: bazarr
           port: 80
           scheme: http
+    - match: Host(`bazarr.watch.super.fish`) && PathPrefix(`/api`)
+      kind: Rule
+      priority: 50
+      services:
+        - kind: Service
+          name: bazarr
+          port: 80
+          scheme: http
     - match: Host(`bazarr.watch.super.fish`) && PathPrefix(`/outpost.goauthentik.io/`)
       kind: Rule
       priority: 100
