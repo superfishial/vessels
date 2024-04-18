@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bin
+  name: atuin
   namespace: argocd
 spec:
   project: vessels
@@ -10,7 +10,7 @@ spec:
     namespace: vessels
   source:
     repoURL: https://github.com/superfishial/vessels
-    path: bin
+    path: vessels/atuin
     targetRevision: HEAD
   syncPolicy:
     automated: {}

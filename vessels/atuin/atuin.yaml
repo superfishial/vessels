@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: atuin
+spec:
+  replicas: 1
+  serviceName: atuin
+
+  volumeClaimTemplates:
+    - metadata:
+        name: config
+      spec:
+        storageClassName: ssd
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: postgres
+      spec:
+        storageClassName: ssd
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+
+      containers:
+        - name: atuin
+          image: ghcr.io/atuinsh/atuin:v18.2.0
+          args:
+            - server
+            - start
+          env:
+            - name: ATUIN_DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: atuin
+                  key: ATUIN_DB_URI
+            - name: ATUIN_HOST
+              value: 0.0.0.0
+            - name: ATUIN_PORT
+              value: "8888"
+            - name: ATUIN_OPEN_REGISTRATION
+              value: "true"
+          ports:
+            - containerPort: 8888
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /config
+              name: config
+
+        - name: postgres
+          image: bitnami/postgresql:15
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: atuin
+                  key: ATUIN_DB_NAME
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: atuin
+                  key: ATUIN_DB_USER
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: atuin
+                  key: ATUIN_DB_PASSWORD
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /bitnami/postgresql
+              name: postgres
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: atuin
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8888
+  selector:
+    app.kubernetes.io/name: atuin
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atuin
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: atuin.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: atuin
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - atuin.super.fish
+      secretName: atuin.super.fish
