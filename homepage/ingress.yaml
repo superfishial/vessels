@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage
+  labels:
+    app: homepage
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: "home.super.fish"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - home.super.fish
+      secretName: home.super.fish
