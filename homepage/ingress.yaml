@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/tls-acme: "true"
 spec:
   rules:
-    - host: "home.super.fish"
+    - host: home.super.fish
       http:
         paths:
           - path: "/"

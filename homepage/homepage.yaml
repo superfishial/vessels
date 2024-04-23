@@ -19,8 +19,6 @@ spec:
       automountServiceAccountToken: true
       dnsPolicy: ClusterFirst
       enableServiceLinks: true
-      # securityContext:
-      #   runAsNonRoot: true
       containers:
         - name: homepage
           image: "ghcr.io/gethomepage/homepage:latest"
