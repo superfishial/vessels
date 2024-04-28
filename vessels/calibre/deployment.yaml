@@ -11,6 +11,7 @@ spec:
       containers:
         - name: calibre
           image: linuxserver/calibre-web:latest
+          imagePullPolicy: Always
           env:
             - name: PUID
               value: "1000"
@@ -19,7 +20,7 @@ spec:
             - name: TZ
               value: Etc/UTC
             - name: DOCKER_MODS
-              value: linuxserver/calibre-web:calibre
+              value: linuxserver/mods:universal-calibre
           ports:
             - name: http
               containerPort: 8083
@@ -29,13 +30,15 @@ spec:
               mountPath: /config
             - name: calibre-books
               mountPath: /books
+          securityContext:
+            allowPrivilegeEscalation: false
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: 128Mi
+              cpu: 100m
             limits:
-              memory: "512Mi"
-              cpu: "1000m"
+              memory: 512Mi
+              cpu: "1"
       volumes:
         - name: calibre-config
           persistentVolumeClaim:

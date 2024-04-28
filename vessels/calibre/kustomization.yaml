@@ -3,8 +3,7 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - ingress.yaml
-  - pvc_books.yaml
-  - pvc_config.yaml
+  - pvc.yaml
   - service.yaml
 namespace: vessels
 commonLabels:
