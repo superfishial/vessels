@@ -6,7 +6,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`calibre.super.fish`)
+    - match: Host(`books.super.fish`)
       kind: Rule
       priority: 10
       middlewares:
@@ -16,7 +16,7 @@ spec:
           name: calibre
           port: http
           scheme: http
-    - match: Host(`calibre.super.fish`) && PathPrefix(`/outpost.goauthentik.io/`)
+    - match: Host(`books.super.fish`) && PathPrefix(`/outpost.goauthentik.io/`)
       kind: Rule
       priority: 15
       services:
@@ -26,7 +26,20 @@ spec:
           port: 80
           scheme: http
   tls:
-    secretName: calibre.super.fish
+    secretName: books.super.fish
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: books.super.fish
+spec:
+  dnsNames:
+    - books.super.fish
+  secretName: books.super.fish
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
 
 ---
 apiVersion: traefik.io/v1alpha1
