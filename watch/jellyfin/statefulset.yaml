@@ -18,7 +18,7 @@ spec:
       nodeName: nereid-1
       containers:
         - name: jellyfin
-          image: jellyfin/jellyfin:10.9.0
+          image: jellyfin/jellyfin:10.9.2
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
