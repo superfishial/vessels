@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - secret.yaml
+  - deployment.yaml
+  - postgres.yaml
+commonLabels:
+  app: tandoor
+namespace: vessels

@@ -1,0 +1,12 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: tandoor-postgres
+spec:
+  instances: 2
+  bootstrap:
+    initdb:
+      database: tandoor
+      owner: tandoor
+  storage:
+    size: 5Gi

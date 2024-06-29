@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tandoor
+data:
+  # serve media directly to avoid using nginx
+  GUNICORN_MEDIA: "1"
+  # defaults to port 80
+  TANDOOR_PORT: "8080"
+  # cloudnative-pg enables ssl
+  DB_OPTIONS: '{"sslmode":"require"}'
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tandoor
+spec:
+  replicas: 1
+  serviceName: tandoor
+  volumeClaimTemplates:
+    - metadata:
+        name: media
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ssd
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: static
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ssd
+        resources:
+          requests:
+            storage: 5Gi
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: tandoor
+          image: vabene1111/recipes:1.5
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: tandoor-postgres-app
+                  key: uri
+          envFrom:
+            - configMapRef:
+                name: tandoor
+            - secretRef:
+                name: tandoor
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: media
+              mountPath: /opt/recipes/mediafiles
+            - name: static
+              mountPath: /opt/recipes/staticfiles
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tandoor
+spec:
+  type: ClusterIP
+  selector:
+    app: tandoor
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tandoor
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: recipes.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tandoor
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - recipes.super.fish
+      secretName: recipes.super.fish
