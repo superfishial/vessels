@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbittorrent-vpn
+  labels:
+    app: qbittorrent-vpn
+spec:
+  replicas: 1
+  serviceName: qbittorrent-vpn
+  selector:
+    matchLabels:
+      app: qbittorrent-vpn
+  template:
+    metadata:
+      labels:
+        app: qbittorrent-vpn
+    spec:
+      nodeName: nereid-1
+      containers:
+        # Torrent client
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:latest
+          imagePullPolicy: Always
+          env:
+            - name: TZ
+              value: Etc/UTC
+            - name: PUID
+              value: "1000"
+            - name: GUID
+              value: "1000"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: utp
+              containerPort: 32222
+          resources:
+            requests:
+              cpu: 100m
+              memory: 8Gi
+            limits:
+              cpu: "2"
+              memory: 12Gi
+          volumeMounts:
+            - mountPath: /data/torrents
+              name: media
+              subPath: torrents
+            - mountPath: /config
+              name: qbittorrent-config
+
+        # VPN
+        - name: vpn
+          image: qmcgaw/gluetun:v3
+          imagePullPolicy: Always
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: mullvad
+            - name: VPN_TYPE
+              value: wireguard
+            - name: PROXY_PORT
+              value: "8888"
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080"
+          envFrom:
+            - secretRef:
+                name: qbittorrent-wireguard
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 400Mi
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+        - name: qbittorrent-config
+          persistentVolumeClaim:
+            claimName: qbittorrent-vpn-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent-vpn
+  labels:
+    app: qbittorrent-vpn
+spec:
+  type: ClusterIP
+  selector:
+    app: qbittorrent-vpn
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
