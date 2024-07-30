@@ -25,8 +25,38 @@ spec:
           namespace: authentik
           port: 80
           scheme: http
+  tls:
+    secretName: torrent.watch.super.fish
 
-    # VPN
+---
+# VPN
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: qbittorrent-vpn
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`torrent.watch.super.fish`)
+      kind: Rule
+      priority: 0
+      middlewares:
+        - name: forward-auth
+      services:
+        - kind: Service
+          name: qbittorrent
+          port: http
+          scheme: http
+    - match: Host(`torrent.watch.super.fish`) && PathPrefix(`/outpost.goauthentik.io/`)
+      kind: Rule
+      priority: 100
+      services:
+        - kind: Service
+          name: authentik
+          namespace: authentik
+          port: 80
+          scheme: http
     - match: Host(`torrent-vpn.watch.super.fish`)
       kind: Rule
       priority: 0
