@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: open-webui
+spec:
+  serviceName: open-webui
+  replicas: 1
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
+  template:
+    spec:
+      containers:
+        - name: open-webui
+          image: ghcr.io/open-webui/open-webui:0.3.12
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: open-webui
+            - secretRef:
+                name: open-webui
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: "6"
+              memory: 4Gi
+          volumeMounts:
+            - name: data
+              mountPath: /app/backend/data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+spec:
+  type: ClusterIP
+  selector:
+    app: open-webui
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: open-webui
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`chat.super.fish`)
+      kind: Rule
+      services:
+        - kind: Service
+          name: open-webui
+          port: 80
+          scheme: http
+  tls:
+    secretName: chat.super.fish
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: chat.super.fish
+spec:
+  dnsNames:
+    - chat.super.fish
+  secretName: chat.super.fish
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

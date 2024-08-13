@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open-webui
+data:
+  ENABLE_OLLAMA_API: "false"
+  OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
+
+  WEBUI_NAME: Super Chat
+  WEBUI_URL: https://chat.super.fish
+
+  ENABLE_OAUTH_SIGNUP: "true"
+  OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
+  OAUTH_CLIENT_ID: fUMbYxYOkJktGXj6Whv8eOg5Ur0SqEGc5LvS3qCi
+  OPENID_PROVIDER_URL: https://auth.super.fish/application/o/open-webui/.well-known/openid-configuration
+  OAUTH_PROVIDER_NAME: Superfishial
+
+  ENABLE_RAG_WEB_SEARCH: "True"
+  RAG_WEB_SEARCH_ENGINE: "serper"
+  RAG_WEB_SEARCH_RESULT_COUNT: "5"
+  RAG_WEB_SEARCH_CONCURRENT_REQUESTS: "10"
