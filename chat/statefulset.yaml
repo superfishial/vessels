@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: open-webui
-          image: ghcr.io/open-webui/open-webui:0.3.12
+          image: ghcr.io/open-webui/open-webui:0.3.13
           imagePullPolicy: Always
           envFrom:
             - configMapRef:
