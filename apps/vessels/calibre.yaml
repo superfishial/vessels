@@ -10,7 +10,7 @@ spec:
     namespace: vessels
   source:
     repoURL: https://github.com/superfishial/vessels
-    path: calibre
+    path: vessels/calibre
     targetRevision: HEAD
   syncPolicy:
     automated: {}

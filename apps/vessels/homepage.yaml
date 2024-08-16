@@ -10,8 +10,7 @@ spec:
     namespace: vessels
   source:
     repoURL: https://github.com/superfishial/vessels
-    path: homepage
+    path: vessels/homepage
     targetRevision: HEAD
   syncPolicy:
     automated: {}
-
