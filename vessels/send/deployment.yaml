@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: send
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    spec:
+      nodeName: nereid-2
+      containers:
+        - name: send
+          image: registry.gitlab.com/timvisee/send:latest
+          imagePullPolicy: Always
+          env:
+            - name: DHPARAM_GENERATION
+              value: "false"
+            - name: NODE_ENV
+              value: production
+            - name: BASE_URL
+              value: https://send.super.fish
+            - name: PORT
+              value: "1234"
+            - name: FILE_DIR
+              value: /uploads
+          ports:
+            - name: http
+              containerPort: 1234
+              protocol: TCP
+          volumeMounts:
+            - name: send-uploads
+              mountPath: /uploads
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: "1"
+        - name: redis
+          image: redis:alpine
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: send-redis
+              mountPath: /data
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: "1"
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: send-uploads
+          persistentVolumeClaim:
+            claimName: send-uploads
+        - name: send-redis
+          persistentVolumeClaim:
+            claimName: send-redis

@@ -1,0 +1,31 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: send
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`send.super.fish`)
+      kind: Rule
+      priority: 10
+      services:
+        - kind: Service
+          name: send
+          port: http
+          scheme: http
+  tls:
+    secretName: send.super.fish
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: send.super.fish
+spec:
+  dnsNames:
+    - send.super.fish
+  secretName: send.super.fish
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
