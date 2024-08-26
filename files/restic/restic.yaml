@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: restic
+spec:
+  serviceName: restic
+  replicas: 1
+  template:
+    spec:
+      nodeName: nereid-2
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: restic
+        image: restic/rest-server:0.12.1
+        env:
+        - name: OPTIONS
+          value: --append-only --prometheus --private-repos
+        ports:
+        - containerPort: 8000
+          name: http
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+          seccompProfile:
+            type: RuntimeDefault
+
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: secret
+          mountPath: /data/.htpasswd
+          subPath: .htpasswd
+
+      volumes:
+        - name: secret
+          secret:
+            secretName: restic
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      storageClassName: hdd-unsafe
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Ti
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restic
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: restic
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: restic.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: restic
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - restic.super.fish
+      secretName: restic.super.fish

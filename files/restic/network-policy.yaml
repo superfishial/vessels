@@ -1,0 +1,33 @@
+# This breaks the restic pod on  50% of requeests for some reason
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restic
+spec:
+  podSelector:
+    matchLabels:
+      app: restic
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    - from:
+        # Allow ingress from traefik in kube-system
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+          namespaceSelector:
+            matchLabels:
+              name: kube-system
+        # Allow ingress from grafana agents in observability
+        # TODO: set pod selector after adding observability
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+      ports:
+        - port: http
+
+  # Disallow all egress
+  egress: []

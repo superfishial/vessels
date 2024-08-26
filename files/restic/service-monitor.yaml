@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: restic
+spec:
+  selector:
+    matchLabels:
+      app: restic
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    basicAuth:
+      username:
+        name: restic
+        key: metricsUsernme
+      password:
+        name: restic
+        key: metricsPassword
