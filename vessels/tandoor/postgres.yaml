@@ -8,5 +8,10 @@ spec:
     initdb:
       database: tandoor
       owner: tandoor
+  managed:
+    roles:
+      - name: tandoor
+        login: true
+        superuser: true
   storage:
     size: 5Gi

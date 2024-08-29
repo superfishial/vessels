@@ -45,7 +45,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: tandoor
-          image: vabene1111/recipes:1.5
+          image: docker.super.fish/vessels/tandoor:latest
           imagePullPolicy: Always
           env:
             - name: DATABASE_URL
