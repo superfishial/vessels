@@ -5,7 +5,7 @@ metadata:
 data:
   # Catppuccin
   custom.css: |
-    .theme-slate {
+    #page_wrapper {
       --color-50: 240 244 255;
       --color-100: 240 244 255;
       --color-200: 240 244 255;
