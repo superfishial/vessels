@@ -3,25 +3,13 @@ kind: Deployment
 metadata:
   name: homepage
 spec:
-  revisionHistoryLimit: 3
   replicas: 1
-  strategy:
-    type: RollingUpdate
-  selector:
-    matchLabels:
-      app: homepage
   template:
-    metadata:
-      labels:
-        app: homepage
     spec:
-      serviceAccountName: homepage
-      automountServiceAccountToken: true
-      dnsPolicy: ClusterFirst
       enableServiceLinks: true
       containers:
         - name: homepage
-          image: "ghcr.io/gethomepage/homepage:latest"
+          image: ghcr.io/gethomepage/homepage:latest
           imagePullPolicy: Always
           ports:
             - name: http
