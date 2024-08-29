@@ -36,6 +36,8 @@ data:
         columns: 1
       admin:
         columns: 1
+      books:
+        columns: 2
       links:
         style: row
         columns: 2
