@@ -24,6 +24,8 @@ spec:
               value: "1234"
             - name: FILE_DIR
               value: /uploads
+            - name: MAX_FILE_SIZE
+              value: "21474836480" # 20GB
           ports:
             - name: http
               containerPort: 1234
@@ -40,6 +42,7 @@ spec:
             limits:
               memory: 512Mi
               cpu: "1"
+
         - name: redis
           image: redis:alpine
           imagePullPolicy: Always
