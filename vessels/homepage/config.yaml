@@ -3,7 +3,20 @@ kind: ConfigMap
 metadata:
   name: homepage
 data:
-  custom.css: ""
+  # Catppuccin
+  custom.css: |
+    .theme-slate {
+      --color-50: 240 244 255;
+      --color-100: 240 244 255;
+      --color-200: 240 244 255;
+      --color-300: 205 214 244;
+      --color-400: 147 153 178;
+      --color-500: 108 112 134;
+      --color-600: 69 71 90;
+      --color-700: 44 44 63;
+      --color-800: 24 24 37;
+      --color-900: 17 17 27;
+    }
   custom.js: ""
   docker.yaml: ""
   kubernetes.yaml: |
@@ -16,10 +29,6 @@ data:
     headerStyle: boxedWidgets
     showStats: true
     cardBlur: sm
-    # background:
-    #   image: "https://i.imgur.com/ZSBWm29.jpeg"
-    #   blur: md
-    #   brightness: 75
     layout:
       watch:
         style: row
