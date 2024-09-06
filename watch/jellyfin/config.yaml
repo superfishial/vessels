@@ -9,4 +9,4 @@ spec:
   storageClassName: ssd
   resources:
     requests:
-      storage: 100Gi
+      storage: 200Gi
