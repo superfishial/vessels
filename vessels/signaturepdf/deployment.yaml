@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signaturepdf
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: signaturepdf
+          image: docker.super.fish/gabe/signaturepdf
+          imagePullPolicy: Always
+          env:
+          - name: SERVERNAME
+            value: pdf.super.fish
+          - name: UPLOAD_MAX_FILESIZE
+            value: 64M
+          - name: POST_MAX_SIZE
+            value: 64M
+          - name: DEFAULT_LANGUAGE
+            value: en_CA.UTF-8
+          - name: PDF_STORAGE_ENCRYPTION
+            value: "true"
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: pdf-storage
+              mountPath: /data
+          # securityContext:
+          #   allowPrivilegeEscalation: false
+          #   seccompProfile:
+          #     type: RuntimeDefault
+          #   capabilities:
+          #     drop:
+          #       - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: '1'
+              memory: 1Gi
+      restartPolicy: Always
+      volumes:
+        - name: pdf-storage
+          persistentVolumeClaim:
+            claimName: pdf-storage
