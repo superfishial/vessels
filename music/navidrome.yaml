@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: navidrome
+spec:
+  serviceName: navidrome
+  replicas: 1
+  template:
+    spec:
+      nodeName: nereid-2
+      containers:
+        - name: navidrome
+          image: ghcr.io/navidrome/navidrome:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4533
+          env:
+            - name: ND_BASEURL
+              value: "https://music.super.fish"
+            - name: ND_LASTFM_ENABLED
+              value: "true"
+            - name: ND_LASTFM_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: navidrome
+                  key: ND_LASTFM_APIKEY
+            - name: ND_LASTFM_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: navidrome
+                  key: ND_LASTFM_SECRET
+            - name: ND_SPOTIFY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: navidrome
+                  key: ND_SPOTIFY_ID
+            - name: ND_SPOTIFY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: navidrome
+                  key: ND_SPOTIFY_SECRET
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: music
+              mountPath: /music
+              readOnly: true
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: navidrome-data
+        - name: music
+          persistentVolumeClaim:
+            claimName: navidrome-music
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: navidrome-music
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: hdd-unsafe
+  resources:
+    requests:
+      storage: 400Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: navidrome-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ssd
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: navidrome
+spec:
+  ports:
+    - name: http
+      port: 4533
+      targetPort: http
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: navidrome
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`music.super.fish`)
+      kind: Rule
+      services:
+        - kind: Service
+          name: navidrome
+          port: http
+          scheme: http
+  tls:
+    secretName: music.super.fish
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: music.super.fish
+spec:
+  dnsNames:
+    - music.super.fish
+  secretName: music.super.fish
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

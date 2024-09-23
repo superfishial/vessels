@@ -1,0 +1,9 @@
+resources:
+  - namespace.yaml
+  - navidrome.yaml
+  - secret.yaml
+namespace: music
+labels:
+  - includeSelectors: true
+    pairs:
+      app: navidrome
