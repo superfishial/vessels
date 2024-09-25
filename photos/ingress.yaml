@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ente
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: api.photos.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ente
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - api.photos.super.fish
+      secretName: api.photos.super.fish
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ente
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

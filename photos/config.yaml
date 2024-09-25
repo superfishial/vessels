@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ente-server-env
+data:
+  ENDPOINT: https://api.photos.super.fish
+  ALBUMS_ENDPOINT: https://albums.photos.super.fish
+  ENTE_APPS_PUBLIC-ALBUMS: https://albums.photos.super.fish
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ente-museum-config
+data:
+  museum.yaml: |
+    internal:
+      admins:
+        - 1580559962386438
+        - 1580559962386439

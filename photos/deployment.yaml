@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ente
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: museum
+          image: ghcr.io/ente-io/server:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ENTE_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: ente-postgres-app
+                  key: host
+            - name: ENTE_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: ente-postgres-app
+                  key: port
+            - name: ENTE_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ente-postgres-app
+                  key: dbname
+            - name: ENTE_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ente-postgres-app
+                  key: username
+            - name: ENTE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ente-postgres-app
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: ente-server-env
+            - secretRef:
+                name: ente-server-env
+          volumeMounts:
+            - name: ente-museum-config
+              mountPath: /museum.yaml
+              subPath: museum.yaml
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+      volumes:
+        - name: ente-museum-config
+          configMap:
+            name: ente-museum-config

@@ -1,0 +1,8 @@
+[{
+	"allowedOrigins": ["*"],
+	"allowedHeaders": ["*"],
+	"allowedOperations": [ "s3_get", "s3_head", "s3_post", "s3_put", "s3_delete" ],
+	"corsRuleName": "s3AllowAllEnte",
+	"maxAgeSeconds": 3600,
+	"exposeHeaders": ["Etag"]
+}]
