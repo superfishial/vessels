@@ -29,6 +29,7 @@ data:
     headerStyle: boxedWidgets
     showStats: true
     cardBlur: sm
+    fiveColumns: true
     layout:
       watch:
         style: row
@@ -46,7 +47,9 @@ data:
       admin:
         columns: 1
       books:
-        columns: 2
+        columns: 1
+      music:
+        columns: 1
       links:
         style: row
         columns: 2
