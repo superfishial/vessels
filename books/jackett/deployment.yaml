@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jackett
+  labels:
+    app: jackett
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: jackett
+  template:
+    metadata:
+      labels:
+        app: jackett
+    spec:
+      containers:
+        - name: jackett
+          image: ghcr.io/hotio/jackett:release
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 500Mi
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /config/ServerConfig.json
+              name: server-config
+              subPath: ServerConfig.json
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: jackett-config
+        - name: server-config
+          secret:
+            secretName: jackett-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jackett
+  labels:
+    app: jackett
+spec:
+  type: ClusterIP
+  selector:
+    app: jackett
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9117

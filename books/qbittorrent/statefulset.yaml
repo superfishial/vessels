@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbittorrent
+  labels:
+    app: qbittorrent
+spec:
+  replicas: 1
+  serviceName: qbittorrent
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      nodeName: nereid-1
+      containers:
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:4.6.5
+          imagePullPolicy: Always
+          env:
+            - name: TZ
+              value: Etc/UTC
+            - name: PUID
+              value: "1000"
+            - name: GUID
+              value: "1000"
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: utp
+              containerPort: 32223
+          resources:
+            requests:
+              cpu: 10m
+              memory: 200Mi
+            limits:
+              cpu: "2"
+              memory: 12Gi
+          volumeMounts:
+            - mountPath: /data/torrents
+              name: books
+              subPath: torrents
+            - mountPath: /config
+              name: qbittorrent-config
+      volumes:
+        - name: books
+          persistentVolumeClaim:
+            claimName: books
+        - name: qbittorrent-config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  labels:
+    app: qbittorrent
+spec:
+  type: ClusterIP
+  selector:
+    app: qbittorrent
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent-external
+  labels:
+    app: qbittorrent
+spec:
+  type: NodePort
+  selector:
+    app: qbittorrent
+  ports:
+    - name: utp
+      port: 32223
+      targetPort: 32223
+      nodePort: 32223

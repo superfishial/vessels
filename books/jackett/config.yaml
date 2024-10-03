@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jackett-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: ssd
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: jackett-config
+  namespace: books
+spec:
+  encryptedData:
+    ServerConfig.json: AgClifZuTDFEd9TnNq3S2oBDKWxjT8jjhMdaUb5hFgax+VGd/4ZvwCIsC8IvYvMh3h5BmV0onKmp5OC9c1P+ERPebw0xfFYlu7UQNNciGgy2DDhyBPd+V50MTMqiTmXsJ4wihIF6mwQqsxPo0KNQY5SiIbxFLN2u/8bWzWv/3mZ2I3QLlO1eLcyPo4C/z0+sDM1APn8xAIiUmf9vyUgASUBhqUD5r4cNPzgtEh9Dl6fQF3ZhzcTcR652CM7+9uEXIGoPGTYe4jC8vKyF/u75WUdPeQcy8m99dWTyCzCUDRkYS2Iv0vqvlINMmN2BJwuf1TM6U6cWRbSa296jWkxiv5m+iKg/V7dU+qN+C1U8Sa4Nz3Q1Bhjb0+bCxxwbNBikSvlyZUvMWZ5BWLmXdoiafB/cN6+6osOt5V/FpS4mN0uXiutpbN2/GEFtF/fVnPgEiPfDIMl0ql+A/ZcYdW1g9w0xrgDGfrnPbwPe7ZlQouOBhpZPItCKVa02y1YGoNdD6EksCJVIuD+ZrhvA7RAoB7sw4ShdNFEG+j6FFwDEBfJYRJdHh1NmvgbmzyaSgO4MnWEsLn0cbw0cAMgy/1k1yL6A9dz4zvLarnVTZv4mdfT/QRF4iZmi6sCeYSY89NdkxykMhxgrJoxAapZdi3Vza2k0l+GwFHK+J8OfxANmVatLuTHbKMnelXY641UfnPq8msp5pOP+qakycfFox4U2tlStVVi2I8agq8NZHVrGK+2ikZ1rRA0hDZH3ClCs/1rJGc5QH486BlTeS/Tl246ICBy6UNHCIS2oHDjiXDYyWFPLRaEfsLDx/kZyGmLGAEnsyH2sxZvUZSYGtdedYRzQ1L5emTpAEnxUufdLmwctzR7zX1OQVkVQw6adxM3RDAnPT+NA/akpiGPUL5ssSyiRTiTHXHPRwLOcEzFzCkSJTXm55nxBWn/+V0roIwT078vDdUWTbjoLKUrYZBB/MC5qX+4otI8J7ouDztn3+tYRTPNc2p5K4eK+u/Fo4PME+hHE5chtadRTpIpMsTyC198fZQBJJH5T2HhotZIm1SzsVASEQRCxjAGsXsaTSbOtxO+PSFMcVS51KN6CnmVc5X9u6m0cCb6SXCLLTVpqtU4jy7wLYDxISp2UCim+ieAhXEymBHG6v0mG8t3WGpgznAu1NqHjAWHVNAHkh/DZye4hVKfLWGEXjp0kor5lB/Mzc2RpNx9Lf6uk1PU+kO38JCbVUiutwPMOx/cYO3zp/D9FWdb3THpQq3g9YyCdP0LE4blDdEO4FsVHgLzNcnitipU0ROfEcbjRsV8TbDi7vpZW4iOfI10VS6t8Zm8oeotNVPGLzJCTojkzM91JTsnw020RV1OzA7kCat3RzJS3hERB8+Ce2FMQhqP0m7R79M/VtjVL60q6mxD18jPi9XR4+R2q7uV+wf6mEIyCoSDFkODsjS4gGSr4np5Sr85SaAVZTaXmPm8q7HVwcWkRAwgCWtP/Mtp2jkTRy1Sw7jK7rxHE69Z6Mu1AGFYYnpfoXAdfGkl2m4yfHKef6sUPQgJShVkVzuthjMy+ppW0rrmoOo7G5kgLbs8+sBg7usALwwIl4e0tRhQ8MoqORBuEez03L6GomKSMl+4nGTICK6OAuFwKKemLPC/gjlOLjyCNQMVI9NfwAA+LVb0=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: jackett-config
+      namespace: books

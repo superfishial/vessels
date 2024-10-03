@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: readarr
+  labels:
+    app: readarr
+spec:
+  replicas: 1
+  serviceName: readarr
+  selector:
+    matchLabels:
+      app: readarr
+  template:
+    metadata:
+      labels:
+        app: readarr
+    spec:
+      nodeName: nereid-1
+      containers:
+        - name: readarr
+          image: ghcr.io/hotio/readarr:latest
+          imagePullPolicy: Always
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+          ports:
+            - name: http
+              containerPort: 8787
+          resources:
+            requests:
+              cpu: 10m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          volumeMounts:
+            - name: readarr-config
+              mountPath: /config
+            - name: books
+              mountPath: /data
+      volumes:
+        - name: readarr-config
+          persistentVolumeClaim:
+            claimName: readarr-config
+        - name: books
+          persistentVolumeClaim:
+            claimName: books
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: readarr
+  labels:
+    app: readarr
+spec:
+  type: ClusterIP
+  selector:
+    app: readarr
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
