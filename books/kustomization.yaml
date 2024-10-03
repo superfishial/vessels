@@ -6,6 +6,5 @@ resources:
   - forward-auth.yaml
   - namespace.yaml
   - ./audiobookshelf
-  - ./lazylibrarian
   - ./jackett
   - ./qbittorrent
