@@ -35,21 +35,19 @@ data:
         style: row
         columns: 3
         useEqualHeights: true
-      upcoming media:
-        style: row
-        columns: 2
-        useEqualHeights: true
-        initiallyCollapsed: true
       productivity:
         columns: 1
       storage:
         columns: 1
-      admin:
-        columns: 1
       books:
+        columns: 1
+      misc:
         columns: 1
       music:
         columns: 1
+      admin:
+        columns: 1
+        initiallyCollapsed: true
       links:
         style: row
         columns: 2
