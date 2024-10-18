@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wger
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  rules:
+    - host: wger.super.fish
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wger
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - wger.super.fish
+      secretName: wger.super.fish
+

@@ -1,0 +1,17 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: wger-postgres
+spec:
+  instances: 2
+  bootstrap:
+    initdb:
+      database: wger
+      owner: wger
+  managed:
+    roles:
+      - name: wger
+        login: true
+        superuser: true
+  storage:
+    size: 5Gi

@@ -1,0 +1,241 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wger-app
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: wger
+          image: wger/server:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: wger-env
+            - configMapRef:
+                name: wger-env-app
+            - secretRef:
+                name: wger-env
+          env:
+            - name: DJANGO_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: host
+            - name: DJANGO_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: port
+            - name: DJANGO_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: dbname
+            - name: DJANGO_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: user
+            - name: DJANGO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: password
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: wger-media
+              mountPath: /home/wger/media
+            - name: wger-static
+              mountPath: /home/wger/static
+            - name: wger-beat
+              mountPath: /home/wger/beat
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: '1'
+              memory: 1Gi
+        - name: redis
+          image: redis:alpine
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: wger-redis
+              mountPath: /data
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: "1"
+      restartPolicy: Always
+      volumes:
+        - name: wger-media
+          persistentVolumeClaim:
+            claimName: wger-media
+        - name: wger-static
+          persistentVolumeClaim:
+            claimName: wger-static
+        - name: wger-beat
+          persistentVolumeClaim:
+            claimName: wger-beat
+        - name: wger-redis
+          persistentVolumeClaim:
+            claimName: wger-redis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wger-celery
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: celery-beat
+          image: wger/server:latest
+          imagePullPolicy: Always
+          command: ["/start-beat"]
+          envFrom:
+            - configMapRef:
+                name: wger-env
+            - configMapRef:
+                name: wger-env-celery
+            - secretRef:
+                name: wger-env
+          env:
+            - name: DJANGO_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: host
+            - name: DJANGO_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: port
+            - name: DJANGO_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: dbname
+            - name: DJANGO_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: user
+            - name: DJANGO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: password
+          volumeMounts:
+            - name: wger-beat
+              mountPath: /home/wger/beat
+        - name: celery-flower
+          image: wger/server:latest
+          imagePullPolicy: Always
+          command: ["/start-flower"]
+          envFrom:
+            - configMapRef:
+                name: wger-env
+            - configMapRef:
+                name: wger-env-celery
+            - secretRef:
+                name: wger-env
+          env:
+            - name: DJANGO_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: host
+            - name: DJANGO_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: port
+            - name: DJANGO_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: dbname
+            - name: DJANGO_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: user
+            - name: DJANGO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: password
+          volumeMounts:
+            - name: wger-beat
+              mountPath: /home/wger/beat
+          ports:
+            - containerPort: 5555
+              name: http-flower
+              protocol: TCP
+        - name: celery-worker
+          image: wger/server:latest
+          imagePullPolicy: Always
+          command: ["/start-worker"]
+          envFrom:
+            - configMapRef:
+                name: wger-env
+            - configMapRef:
+                name: wger-env-celery
+            - secretRef:
+                name: wger-env
+          env:
+            - name: DJANGO_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: host
+            - name: DJANGO_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: port
+            - name: DJANGO_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: dbname
+            - name: DJANGO_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: user
+            - name: DJANGO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wger-postgres-app
+                  key: password
+          volumeMounts:
+            - name: wger-media
+              mountPath: /home/wger/media
+      restartPolicy: Always
+      volumes:
+        - name: wger-media
+          persistentVolumeClaim:
+            claimName: wger-media
+        - name: wger-static
+          persistentVolumeClaim:
+            claimName: wger-static
+        - name: wger-beat
+          persistentVolumeClaim:
+            claimName: wger-beat
+        - name: wger-redis
+          persistentVolumeClaim:
+            claimName: wger-redis

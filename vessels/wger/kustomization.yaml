@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- config-map.yaml
+- deployment.yaml
+- ingress.yaml
+- postgres.yaml
+- pvc.yaml
+- secret.yaml
+- service.yaml
+namespace: vessels
+labels:
+- includeSelectors: true
+  pairs:
+    app: wger
