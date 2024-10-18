@@ -1,11 +1,14 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: wger-app
+  name: wger
 spec:
+  serviceName: wger
   replicas: 1
   template:
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: wger
           image: wger/server:latest
@@ -43,10 +46,6 @@ spec:
                 secretKeyRef:
                   name: wger-postgres-app
                   key: password
-          ports:
-            - containerPort: 8000
-              name: http
-              protocol: TCP
           volumeMounts:
             - name: wger-media
               mountPath: /home/wger/media
@@ -59,8 +58,24 @@ spec:
               cpu: 100m
               memory: 512Mi
             limits:
-              cpu: '1'
-              memory: 1Gi
+              cpu: "1"
+              memory: 4Gi
+
+        - name: nginx
+          image: nginx:stable
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: wger-static
+              mountPath: /wger/static
+            - name: wger-media
+              mountPath: /wger/media
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+
         - name: redis
           image: redis:alpine
           imagePullPolicy: Always
@@ -74,33 +89,9 @@ spec:
               memory: 128Mi
               cpu: 100m
             limits:
-              memory: 512Mi
+              memory: 1Gi
               cpu: "1"
-      restartPolicy: Always
-      volumes:
-        - name: wger-media
-          persistentVolumeClaim:
-            claimName: wger-media
-        - name: wger-static
-          persistentVolumeClaim:
-            claimName: wger-static
-        - name: wger-beat
-          persistentVolumeClaim:
-            claimName: wger-beat
-        - name: wger-redis
-          persistentVolumeClaim:
-            claimName: wger-redis
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: wger-celery
-spec:
-  replicas: 1
-  template:
-    spec:
-      containers:
         - name: celery-beat
           image: wger/server:latest
           imagePullPolicy: Always
@@ -141,6 +132,7 @@ spec:
           volumeMounts:
             - name: wger-beat
               mountPath: /home/wger/beat
+
         - name: celery-flower
           image: wger/server:latest
           imagePullPolicy: Always
@@ -181,10 +173,7 @@ spec:
           volumeMounts:
             - name: wger-beat
               mountPath: /home/wger/beat
-          ports:
-            - containerPort: 5555
-              name: http-flower
-              protocol: TCP
+
         - name: celery-worker
           image: wger/server:latest
           imagePullPolicy: Always
@@ -225,7 +214,7 @@ spec:
           volumeMounts:
             - name: wger-media
               mountPath: /home/wger/media
-      restartPolicy: Always
+
       volumes:
         - name: wger-media
           persistentVolumeClaim:
@@ -239,3 +228,6 @@ spec:
         - name: wger-redis
           persistentVolumeClaim:
             claimName: wger-redis
+        - name: nginx-conf
+          configMap:
+            name: wger-nginx-conf

@@ -4,7 +4,7 @@ metadata:
   name: wger-static
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   storageClassName: ssd
   resources:
     requests:
@@ -17,7 +17,7 @@ metadata:
   name: wger-media
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   storageClassName: ssd
   resources:
     requests:
@@ -30,7 +30,7 @@ metadata:
   name: wger-beat
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   storageClassName: ssd
   resources:
     requests:
